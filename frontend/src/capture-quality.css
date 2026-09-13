@@ -1,0 +1,22 @@
+.capture-quality {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(min(210px, 100%), 1fr));
+  gap: 12px 24px;
+  border-top: 1px solid #e1e8e4;
+  padding: 12px 20px;
+  font-size: 12px;
+}
+.channel-quality {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 6px 12px;
+  min-width: 0;
+}
+.channel-quality meter { width: 100%; height: 9px; }
+.channel-quality-status { text-align: right; }
+.channel-quality-status.normal { color: #187367; }
+.channel-quality-status.muted, .channel-quality-clipping { color: #68766e; }
+.channel-quality-status.warn { color: #93611b; }
+.channel-quality-status.bad { color: #b33e48; }
+.channel-quality-clipping { font-variant-numeric: tabular-nums; }

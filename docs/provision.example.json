@@ -1,0 +1,28 @@
+{
+  "hospital_id": "hospital-example",
+  "oidc_issuer": "https://identity.hospital.example",
+  "encounters": [
+    {
+      "id": "enc-example-001",
+      "patient_id": "patient-example-001",
+      "admission_id": "admission-example-001",
+      "patient_name": "SYNTHETIC EXAMPLE ONLY",
+      "bed": "01",
+      "department": "Example department",
+      "age": 60,
+      "sex": "unknown",
+      "admitted_at": "2026-09-09T00:00:00+08:00",
+      "diagnosis": ""
+    }
+  ],
+  "users": [
+    {
+      "username": "example-doctor",
+      "oidc_subject": "REPLACE_WITH_VERIFIED_HOSPITAL_SUBJECT",
+      "display_name": "Example doctor",
+      "roles": ["doctor", "reviewer"],
+      "encounter_ids": ["enc-example-001"],
+      "active": false
+    }
+  ]
+}

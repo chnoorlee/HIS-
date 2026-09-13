@@ -1,0 +1,12 @@
+.git
+.local
+**/node_modules
+**/.venv
+**/data
+**/bin
+**/obj
+artifacts
+**/artifacts
+**/dist
+**/__pycache__
+**/.pytest_cache
