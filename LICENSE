@@ -1,0 +1,117 @@
+HIS- Noncommercial Attribution License 1.0
+
+Copyright (c) 2026 Yongzhi Li (chnoorlee)
+Original repository: https://github.com/chnoorlee/HIS-
+Custom license identifier: LicenseRef-HIS-Noncommercial-Attribution-1.0
+
+This is a custom source-available license. It is not an OSI-approved
+open-source license. The English terms in this file are authoritative;
+summaries and examples in other files do not replace these terms.
+
+1. Scope and definitions
+
+"Licensor" means the copyright holder offering material under this license.
+"Software" means the original source code, documentation, and assets in
+this repository that the Licensor has the right to license, including
+copies and modifications of that material. Separately identified
+third-party material is excluded and remains under its own license.
+"You" means any person or organization exercising rights under this license.
+
+"Noncommercial Use" means use that is not primarily intended for or
+directed toward commercial advantage or monetary compensation. The
+purpose of the activity determines whether it is noncommercial; being
+a hospital, school, charity, government body, or other nonprofit
+organization does not by itself exempt an activity from this restriction.
+
+2. Permission for noncommercial use
+
+Subject to all the conditions in this license, the Licensor grants You
+a worldwide, nonexclusive, royalty-free copyright license to use, run,
+study, copy, modify, create derivative works of, host, and distribute the
+Software, in source or compiled form, solely for Noncommercial Use.
+
+Personal learning, noncommercial research, teaching, experimentation,
+and noncommercial collaborative development are examples of permitted
+activities when they satisfy the definition above. You do not have to
+publish private modifications or disclose source code merely because
+You use or modify the Software.
+
+3. Commercial use requires separate permission
+
+This license does not authorize commercial use. Examples include selling
+or commercially licensing the Software or derivatives; paid hosting,
+SaaS, deployment, integration, or support services based on the Software;
+incorporation into commercial products or services; and use in commercial
+business operations. Making a product free of charge does not make its
+use noncommercial if its primary purpose is commercial advantage.
+
+Before any such use, You must obtain separate written permission from
+the relevant copyright holder. Attribution alone is not commercial
+permission. The Licensor remains free to use its own work commercially
+and to offer it under separate licenses.
+
+4. Attribution and source reference
+
+Whenever You redistribute any part of the Software, with or without
+modifications, You must retain all applicable copyright notices and
+include this LICENSE and the attribution information in NOTICE. In a
+source distribution, retain NOTICE as a file. In a compiled distribution,
+include its contents in the accompanying legal notices or documentation.
+
+Any distributed derivative project must prominently identify the original
+author and repository in its README or equivalent project documentation.
+When You provide an application or hosted service incorporating the
+Software to other users, including internal users, You must also display
+the following attribution in an easily accessible About, Credits, or
+Legal Notices view, or equivalent user-facing documentation for software
+without a graphical interface:
+
+  Based on HIS- (https://github.com/chnoorlee/HIS-).
+  Original author: Yongzhi Li (chnoorlee).
+  Licensed under the HIS- Noncommercial Attribution License 1.0.
+
+The repository URL must be a clickable link where the medium supports
+links, and otherwise must be reproduced as text. You may translate the
+surrounding wording, but must retain the author name, repository URL,
+and license name. Do not remove this attribution from copied or modified
+material, or imply that the original author endorses Your work.
+
+5. Modifications and downstream recipients
+
+Clearly identify redistributed modifications as modified and describe
+the substantial changes in the project documentation or change history.
+Do not present a derivative as an unmodified official release.
+
+The original Software and any copied portions remain subject to this
+license. You may choose terms for Your own original additions only if
+they do not remove or contradict the noncommercial, attribution, or
+other conditions applicable to the Software. Each recipient receives
+permission for the Software directly from the Licensor under these terms.
+
+6. Other rights and materials
+
+Third-party libraries, models, services, and other separately licensed
+materials retain their own terms. This license grants no rights the
+Licensor does not hold, and no right to use names or trademarks beyond
+the attribution required above. Statutory rights and exceptions,
+including fair use where applicable, are not restricted by this license.
+This license does not claim ownership of recordings, patient information,
+or records supplied to or produced with the Software.
+
+7. Termination
+
+Your permissions under this license terminate automatically if You
+violate its conditions. For a first violation, they are reinstated if
+You fully correct the violation within 30 days after discovering it or
+receiving written notice, whichever occurs first. Reinstatement does not
+waive responsibility for past violations. Any other reinstatement requires
+written permission from the relevant copyright holder.
+
+8. No warranty or liability
+
+To the extent permitted by applicable law, the Software is provided
+"AS IS", without warranties of any kind, including merchantability,
+fitness for a particular purpose, and noninfringement. The Licensor is
+not liable for claims, damages, or other liability arising from the
+Software or its use, whether in contract, tort, or otherwise. Nothing
+in this license excludes liability that cannot lawfully be excluded.
