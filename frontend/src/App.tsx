@@ -40,6 +40,7 @@ import Recording from "./Recording";
 import Evidence from "./Evidence";
 import NoteEditor from "./NoteEditor";
 import { bridgeCall, hasNativeBridge } from "./bridge";
+import { PUBLIC_DEMO } from "./mode";
 import {
   type AuditEntry,
   type Encounter,
@@ -80,6 +81,7 @@ export default function App() {
   const [facts, setFacts] = useState<Fact[]>([]);
   const [error, setError] = useState("");
   const errorToast = useRef<HTMLDivElement>(null);
+  const topbar = useRef<HTMLElement>(null);
   const [online, setOnline] = useState(navigator.onLine);
   const [active, setActive] = useState(false);
   const [dirty, setDirty] = useState(false);
@@ -142,6 +144,29 @@ export default function App() {
     observer.observe(notice);
     return () => { observer.disconnect(); shell.style.removeProperty("--error-toast-height"); };
   }, [error]);
+  useLayoutEffect(() => {
+    if (!PUBLIC_DEMO || !sidebar) return;
+    const header = topbar.current;
+    const shell = header?.closest<HTMLElement>(".app-shell");
+    if (!header || !shell) return;
+    const measure = () => shell.style.setProperty(
+      "--public-demo-drawer-top",
+      `${Math.max(0, header.getBoundingClientRect().bottom)}px`,
+    );
+    measure();
+    const observer = new ResizeObserver(measure);
+    observer.observe(header);
+    const banner = shell.querySelector(".public-demo-banner");
+    if (banner) observer.observe(banner);
+    window.addEventListener("resize", measure);
+    window.addEventListener("scroll", measure, { passive: true });
+    return () => {
+      observer.disconnect();
+      window.removeEventListener("resize", measure);
+      window.removeEventListener("scroll", measure);
+      shell.style.removeProperty("--public-demo-drawer-top");
+    };
+  }, [sidebar]);
   useEffect(() => {
     mounted.current = true;
     let cancelled = false;
@@ -273,7 +298,7 @@ export default function App() {
     return () => { cancelled = true; };
   }, [encounter?.id, refresh, handleError]);
   useEffect(() => {
-    if (!session?.id) return;
+    if (PUBLIC_DEMO || !session?.id) return;
     let cancelled = false;
     const id = session.id;
     const timer = setInterval(() => {
@@ -387,7 +412,7 @@ export default function App() {
     return (
       <div className="startup">
         <HeartPulse size={32} />
-        <Loading text="正在恢复院内工作台…" />
+        <Loading text={PUBLIC_DEMO ? "正在载入公开演示 · 虚构数据 · 只读" : "正在恢复院内工作台…"} />
       </div>
     );
   if (!user)
@@ -400,8 +425,13 @@ export default function App() {
       />
     );
   return (
-    <div className="app-shell">
-      <header className="topbar">
+    <div className={`app-shell${PUBLIC_DEMO ? " public-demo" : ""}`}>
+      {PUBLIC_DEMO && <div className="public-demo-banner" role="status">
+        <strong>公开演示 · 虚构数据 · 只读</strong>
+        <span>未连接医院、ASR 或模型服务</span>
+        <a href="https://github.com/chnoorlee/HIS-" target="_blank" rel="noreferrer">Yongzhi Li (chnoorlee) · 源码</a>
+      </div>}
+      <header className="topbar" ref={topbar}>
         <div className="brand">
           <IconButton
             label="展开患者列表"
@@ -425,19 +455,19 @@ export default function App() {
               ? "示范医院 · 虚构数据"
               : user.hospital_id}
           </span>
-          {development && <span className="environment-label">本地开发</span>}
+          {development && !PUBLIC_DEMO && <span className="environment-label">本地开发</span>}
         </div>
         <div className="account">
           <span className={`connection-dot ${!online ? "red" : ""}`} />
           <span className="connection-label">
-            {online ? "服务已连接" : "网络离线"}
+            {PUBLIC_DEMO ? "静态演示" : online ? "服务已连接" : "网络离线"}
           </span>
           <div className="account-divider" />
           <div className="avatar">
             {(user.display_name ?? user.username).slice(0, 1)}
           </div>
           <span>{user.display_name ?? user.username}</span>
-          <IconButton label="退出登录" onClick={() => void logout()}>
+          <IconButton label="退出登录" disabled={PUBLIC_DEMO} onClick={() => void logout()}>
             <LogOut size={17} />
           </IconButton>
         </div>
@@ -520,11 +550,11 @@ export default function App() {
           </div>
           <div className="sidebar-footer">
             <ShieldCheck size={15} />
-            <span>医院与就诊权限控制</span>
+            <span>{PUBLIC_DEMO ? "公开虚构样例 · 无医院权限" : "医院与就诊权限控制"}</span>
           </div>
         </aside>
         <main className="main-content">
-          {!online && (
+          {!PUBLIC_DEMO && !online && (
             <div className="offline-banner" role="alert">
               <WifiOff size={16} />
               当前网络离线，录音与提交状态需要恢复连接后核实。
@@ -657,6 +687,7 @@ export default function App() {
                     </div>
                     <button
                       className="secondary"
+                      disabled={PUBLIC_DEMO}
                       onClick={() =>
                         void post(`/encounters/${encounter.id}/sources/refresh`)
                           .then(refresh)
@@ -989,6 +1020,7 @@ function ActivityPage({
                         {item.status === "UNKNOWN" ? (
                           <button
                             className="secondary"
+                            disabled={PUBLIC_DEMO}
                             onClick={() =>
                               void post(`/exports/${item.id}/reconcile`)
                                 .then(refresh)
@@ -1049,7 +1081,7 @@ function AuditPage({ onError }: { onError: (error: unknown) => void }) {
       <div className="page-title">
         <div>
           <h2>访问与操作审计</h2>
-          <p>当前账号获准查看的操作记录</p>
+          <p>{PUBLIC_DEMO ? "预置虚构审计样例 · 不记录访客操作" : "当前账号获准查看的操作记录"}</p>
         </div>
         <IconButton
           label="刷新审计记录"
@@ -1146,11 +1178,11 @@ function SettingsPage({
       <div className="page-title">
         <div>
           <h2>系统设置</h2>
-          <p>医院范围配置 · 仅管理员可变更</p>
+          <p>{PUBLIC_DEMO ? "公开演示配置 · 未连接医院服务" : "医院范围配置 · 仅管理员可变更"}</p>
         </div>
         <button
           className="primary"
-          disabled={busy || loading}
+          disabled={PUBLIC_DEMO || busy || loading}
           onClick={() => void save()}
         >
           <Settings2 size={15} />
@@ -1186,6 +1218,7 @@ function SettingsPage({
                   {typeof value === "boolean" ? (
                     <input
                       type="checkbox"
+                      disabled={PUBLIC_DEMO}
                       checked={value}
                       onChange={(event) =>
                         setSettings({
@@ -1197,6 +1230,7 @@ function SettingsPage({
                   ) : typeof value === "number" ? (
                     <input
                       type="number"
+                      disabled={PUBLIC_DEMO}
                       min={0}
                       value={value}
                       onChange={(event) =>
@@ -1208,6 +1242,7 @@ function SettingsPage({
                     />
                   ) : key.includes("scenario") ? (
                     <select
+                      disabled={PUBLIC_DEMO}
                       value={String(value)}
                       onChange={(event) =>
                         setSettings({ ...settings, [key]: event.target.value })
@@ -1222,6 +1257,7 @@ function SettingsPage({
                     </select>
                   ) : typeof value === "string" ? (
                     <input
+                      readOnly={PUBLIC_DEMO}
                       value={value}
                       onChange={(event) =>
                         setSettings({ ...settings, [key]: event.target.value })

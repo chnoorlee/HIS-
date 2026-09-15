@@ -1,6 +1,7 @@
 import { UserManager, WebStorageStateStore } from "oidc-client-ts";
 import { api, tokenStore } from "./api";
 import type { User } from "./types";
+import { PUBLIC_DEMO } from "./mode";
 
 export interface AuthConfig {
   environment: string;
@@ -27,6 +28,7 @@ function oidc(config: AuthConfig) {
   return manager;
 }
 export async function restoreIdentity(config: AuthConfig): Promise<User | null> {
+  if (PUBLIC_DEMO) return (await import("./demo")).demoUser;
   if (config.mode === "oidc") {
     const client = oidc(config);
     const query = new URLSearchParams(location.search);

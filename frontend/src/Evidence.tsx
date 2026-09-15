@@ -26,6 +26,7 @@ import {
   Status,
 } from "./components";
 import { ROLE_NAMES, type Fact, type Job, type Source, type Transcript } from "./types";
+import { PUBLIC_DEMO } from "./mode";
 const SECTION_NAMES: Record<string, string> = {
   chief_complaint: "主诉",
   history_present: "现病史",
@@ -236,7 +237,7 @@ export default function Evidence({
       <div className="evidence-heading">
         <h2>来源与事实</h2>
         <span className="count-badge">{facts.length}</span>
-        <button className="text-button push" disabled={!sessionId || !extractionReady || busy || extracting || !transcripts.length} title={extractionReady ? "提取当前稳定来源的临床事实" : "医院事实提取服务尚未配置"} onClick={() => void run(async () => {
+        <button className="text-button push" disabled={PUBLIC_DEMO || !sessionId || !extractionReady || busy || extracting || !transcripts.length} title={PUBLIC_DEMO ? "公开演示未连接模型服务" : extractionReady ? "提取当前稳定来源的临床事实" : "医院事实提取服务尚未配置"} onClick={() => void run(async () => {
           const result = await api<Job>(`/sessions/${sessionId}/extract-facts`, { method: "POST" });
           setExtractionJob(result);
           setTab("facts");
@@ -268,7 +269,7 @@ export default function Evidence({
             <span>当前会话 · {sessionId ? connection : "稳定片段"}</span>
             <button
               className="text-button"
-              disabled={!sessionId}
+              disabled={PUBLIC_DEMO || !sessionId}
               onClick={() => editTranscript()}
             >
               <Plus size={14} />
@@ -297,12 +298,13 @@ export default function Evidence({
                   <p>{item.text}</p>
                   <div className="transcript-footer">
                     <span>
-                      {item.audio_range ? "音频来源" : "医生录入"} · v
+                      {PUBLIC_DEMO ? "预置虚构脚本" : item.audio_range ? "音频来源" : "医生录入"} · v
                       {item.revision}
                     </span>
                     <div className="inline">
                       <IconButton
                         label="编辑转写与角色"
+                        disabled={PUBLIC_DEMO}
                         onClick={() => editTranscript(item)}
                       >
                         <Pencil size={14} />
@@ -310,7 +312,7 @@ export default function Evidence({
                       {item.audio_range && (
                         <IconButton
                           label="回放原音"
-                          disabled={audioLoading}
+                          disabled={PUBLIC_DEMO || audioLoading}
                           onClick={() => void playTranscript(item)}
                         >
                           <AudioLines size={15} />
@@ -408,7 +410,7 @@ export default function Evidence({
       )}
       {adding && (
         <Modal
-          title={editing ? "修订转写与角色" : "医生补充记录"}
+          title={PUBLIC_DEMO ? "转写来源（虚构）" : editing ? "修订转写与角色" : "医生补充记录"}
           onClose={() => setAdding(false)}
         >
           <div className="form-stack">
@@ -416,6 +418,7 @@ export default function Evidence({
               <label>
                 陈述者
                 <select
+                  disabled={PUBLIC_DEMO}
                   value={speaker}
                   onChange={(event) => setSpeaker(event.target.value)}
                 >
@@ -429,6 +432,7 @@ export default function Evidence({
               <label>
                 临床主体
                 <select
+                  disabled={PUBLIC_DEMO}
                   value={subject}
                   onChange={(event) => setSubject(event.target.value)}
                 >
@@ -458,20 +462,21 @@ export default function Evidence({
             <label>
               原始陈述
               <textarea
+                readOnly={PUBLIC_DEMO}
                 rows={7}
                 value={text}
                 onChange={(event) => setText(event.target.value)}
                 placeholder="输入已明确获取的临床信息"
               />
             </label>
-            {editing && <Notice>修订来源会使依赖此来源的文书审核失效。</Notice>}
+            {editing && !PUBLIC_DEMO && <Notice>修订来源会使依赖此来源的文书审核失效。</Notice>}
             <div className="modal-actions">
               <button className="secondary" onClick={() => setAdding(false)}>
                 取消
               </button>
               <button
                 className="primary"
-                disabled={busy || !text.trim()}
+                disabled={PUBLIC_DEMO || busy || !text.trim()}
                 onClick={() => void saveTranscript()}
               >
                 <Save size={16} />
@@ -489,6 +494,7 @@ export default function Evidence({
               事实原文
               <textarea
                 aria-label="事实原文"
+                readOnly={PUBLIC_DEMO}
                 value={fact.text}
                 rows={3}
                 onChange={(event) =>
@@ -500,6 +506,7 @@ export default function Evidence({
               <label>
                 陈述者
                 <select
+                  disabled={PUBLIC_DEMO}
                   value={fact.speaker}
                   onChange={(event) =>
                     setFact({ ...fact, speaker: event.target.value })
@@ -515,6 +522,7 @@ export default function Evidence({
               <label>
                 临床主体
                 <select
+                  disabled={PUBLIC_DEMO}
                   value={fact.subject}
                   onChange={(event) =>
                     setFact({ ...fact, subject: event.target.value })
@@ -530,6 +538,7 @@ export default function Evidence({
               <label>
                 肯否
                 <select
+                  disabled={PUBLIC_DEMO}
                   value={fact.polarity}
                   onChange={(event) =>
                     setFact({ ...fact, polarity: event.target.value })
@@ -543,6 +552,7 @@ export default function Evidence({
               <label>
                 确定性
                 <select
+                  disabled={PUBLIC_DEMO}
                   value={fact.certainty}
                   onChange={(event) =>
                     setFact({ ...fact, certainty: event.target.value })
@@ -557,6 +567,7 @@ export default function Evidence({
               <label>
                 获取状态
                 <select
+                  disabled={PUBLIC_DEMO}
                   value={fact.elicitation}
                   onChange={(event) =>
                     setFact({ ...fact, elicitation: event.target.value })
@@ -572,6 +583,7 @@ export default function Evidence({
               <label>
                 冲突状态
                 <select
+                  disabled={PUBLIC_DEMO}
                   value={fact.conflict_status}
                   onChange={(event) =>
                     setFact({ ...fact, conflict_status: event.target.value })
@@ -585,13 +597,13 @@ export default function Evidence({
             </div>
             <label>
               核查结论
-              <select aria-label="核查结论" value={fact.confirmation_status} onChange={(event) => setFact({ ...fact, confirmation_status: event.target.value })}>
+              <select disabled={PUBLIC_DEMO} aria-label="核查结论" value={fact.confirmation_status} onChange={(event) => setFact({ ...fact, confirmation_status: event.target.value })}>
                 <option value="unconfirmed">待核查</option>
                 <option value="confirmed">已核查原始来源并确认</option>
                 <option value="excluded">排除本项事实</option>
               </select>
             </label>
-            <label>核查与处理说明{fact.confirmation_status === "excluded" ? "（排除必填）" : ""}<textarea aria-label="核查与处理说明" rows={2} maxLength={2000} required={fact.confirmation_status === "excluded"} value={resolutionReason} onChange={event=>setResolutionReason(event.target.value)} placeholder="来源修订、排除事实或解决冲突时必填"/></label>
+            <label>核查与处理说明{fact.confirmation_status === "excluded" ? "（排除必填）" : ""}<textarea readOnly={PUBLIC_DEMO} aria-label="核查与处理说明" rows={2} maxLength={2000} required={fact.confirmation_status === "excluded"} value={resolutionReason} onChange={event=>setResolutionReason(event.target.value)} placeholder="来源修订、排除事实或解决冲突时必填"/></label>
             <div className="source-links">
               <h3>证据引用</h3>
               {fact.source_ids?.map((id) => {
@@ -634,7 +646,7 @@ export default function Evidence({
               <span className="muted">基础版本 v{fact.revision}</span>
               <button
                 className="primary"
-                disabled={busy || !fact.text.trim() || (fact.confirmation_status === "excluded" && resolutionReason.trim().length < 3)}
+                disabled={PUBLIC_DEMO || busy || !fact.text.trim() || (fact.confirmation_status === "excluded" && resolutionReason.trim().length < 3)}
                 onClick={() => void saveFact()}
               >
                 <Save size={16} />

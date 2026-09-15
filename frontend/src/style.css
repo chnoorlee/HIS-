@@ -346,6 +346,25 @@ svg {
 .app-shell {
   min-height: 100vh;
 }
+.public-demo-banner {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 6px 18px;
+  padding: 10px 24px;
+  background: #fff5d6;
+  border-bottom: 1px solid #e1ce88;
+  color: #63521c;
+  font-size: 12px;
+  line-height: 1.5;
+}
+.public-demo-banner strong { font-size: 13px; }
+.public-demo-banner a { color: #345e72; overflow-wrap: anywhere; }
+@media (max-width: 600px) {
+  .public-demo-banner { padding: 9px 14px; gap: 3px 14px; }
+  .public-demo-banner strong { width: 100%; }
+}
 .topbar {
   height: 72px;
   border-bottom: 1px solid var(--line);
@@ -2109,6 +2128,13 @@ td .status {
     z-index: 49;
     border: 0;
     border-radius: 0;
+  }
+  .public-demo .sidebar,
+  .public-demo .sidebar-backdrop {
+    top: var(--public-demo-drawer-top, 65px);
+  }
+  .public-demo .sidebar {
+    min-height: 0;
   }
   .main-nav {
     height: 49px;

@@ -20,6 +20,7 @@ import {
   Sparkles,
 } from "lucide-react";
 import { ApiError, api, isCancelled, post, patch } from "./api";
+import { PUBLIC_DEMO } from "./mode";
 import {
   Empty,
   IconButton,
@@ -455,7 +456,7 @@ export default function NoteEditor({
         ))}
         <IconButton
           label={`新建${NOTE_TYPES[type]}`}
-          disabled={!sessionId || busy}
+          disabled={PUBLIC_DEMO || !sessionId || busy}
           onClick={() => requestAction({ kind: "create", noteType: type })}
         >
           <Plus size={16} />
@@ -512,7 +513,7 @@ export default function NoteEditor({
           action={
             <button
               className="primary"
-              disabled={!sessionId || busy}
+              disabled={PUBLIC_DEMO || !sessionId || busy}
               onClick={() => requestAction({ kind: "create", noteType: type })}
             >
               <Plus size={16} />
@@ -577,6 +578,7 @@ export default function NoteEditor({
                 </div>
                 <textarea
                   aria-label={block.title}
+                  readOnly={PUBLIC_DEMO}
                   value={block.text ?? ""}
                   placeholder={`填写${block.title}，保留未问、不详与不确定信息`}
                   onChange={(event) => updateBlock(index, event.target.value)}
@@ -622,14 +624,14 @@ export default function NoteEditor({
               ) : (
                 <>
                   <Check size={13} />
-                  版本 v{note.revision} 已保存
+                  {PUBLIC_DEMO ? `预置版本 v${note.revision} · 只读` : `版本 v${note.revision} 已保存`}
                 </>
               )}
             </span>
             <div className="inline gap">
               <IconButton
                 label="下载当前文书文本"
-                disabled={dirty || busy}
+                disabled={PUBLIC_DEMO || dirty || busy}
                 onClick={download}
               >
                 <Download size={17} />
@@ -637,6 +639,7 @@ export default function NoteEditor({
               <button
                 className="secondary"
                 disabled={
+                  PUBLIC_DEMO ||
                   busy ||
                   dirty ||
                   Boolean(hasRunningJob) ||
@@ -654,7 +657,7 @@ export default function NoteEditor({
               </button>
               <button
                 className="secondary"
-                disabled={busy || !dirty || note.status === "QUARANTINED"}
+                disabled={PUBLIC_DEMO || busy || !dirty || note.status === "QUARANTINED"}
                 onClick={() => void save()}
               >
                 <Save size={15} />
@@ -662,7 +665,7 @@ export default function NoteEditor({
               </button>
               <button
                 className="primary"
-                disabled={busy || dirty || note.status === "QUARANTINED"}
+                disabled={PUBLIC_DEMO || busy || dirty || note.status === "QUARANTINED"}
                 onClick={() => {
                   setIssues(note.issues ?? []);
                   setReviewOpen(true);
@@ -684,12 +687,12 @@ export default function NoteEditor({
                     ? `v${note.revision} 已完成医生审核`
                     : "写回前需审核当前版本"}
                 </strong>
-                <span>写入 EMR 草稿 · 院内系统完成正式签署</span>
+                <span>{PUBLIC_DEMO ? "公开演示未连接 EMR · 不执行写回" : "写入 EMR 草稿 · 院内系统完成正式签署"}</span>
               </div>
             </div>
             <button
               className="secondary"
-              disabled={!reviewed || busy || exportOp?.status === "UNKNOWN"}
+              disabled={PUBLIC_DEMO || !reviewed || busy || exportOp?.status === "UNKNOWN"}
               onClick={() => void exportNote()}
             >
               <ArrowUpRight size={15} />
@@ -836,18 +839,18 @@ export default function NoteEditor({
       {reviewingBlock && (
         <Modal title={`${referenceMode === "review" ? "核对引用" : "章节来源"} · ${reviewingBlock.title}`} onClose={() => setReferenceBlock(null)} wide>
           <div className="form-stack">
-            {referenceMode === "sources" ? <label>章节文字<textarea aria-label="章节文字" rows={5} maxLength={40000} value={referenceText} onChange={(event) => setReferenceText(event.target.value)} /></label>
+            {referenceMode === "sources" ? <label>章节文字<textarea aria-label="章节文字" readOnly={PUBLIC_DEMO} rows={5} maxLength={40000} value={referenceText} onChange={(event) => setReferenceText(event.target.value)} /></label>
               : <div className="reference-original"><h3>文书中的既有表述</h3><p>{reviewingBlock.text || "（空）"}</p></div>}
             {referenceLoading ? <p role="status">正在读取当前引用事实…</p> : referenceError ? <Notice kind="bad">{referenceError}</Notice> : (referenceMode === "review" ? reviewingBlock.fact_ids : [...new Set([...reviewingBlock.fact_ids, ...referenceFacts.map((fact) => fact.id)])]).map((id) => {
               const current = referenceFacts.find((fact) => fact.id === id);
               return <div className="reference-fact" key={id}>
                 <div className="inline gap">
-                  {referenceMode === "sources" ? <label className="checkbox-row"><input type="checkbox" aria-label={`引用 ${current?.text ?? id}`} checked={referenceSelection.includes(id)} disabled={(!current || current.confirmation_status === "excluded") && !referenceSelection.includes(id)} onChange={(event) => setReferenceSelection((selected) => event.target.checked ? [...selected, id] : selected.filter((value) => value !== id))} />引用事实</label> : <strong>引用事实</strong>}
+                  {referenceMode === "sources" ? <label className="checkbox-row"><input type="checkbox" aria-label={`引用 ${current?.text ?? id}`} checked={referenceSelection.includes(id)} disabled={PUBLIC_DEMO || ((!current || current.confirmation_status === "excluded") && !referenceSelection.includes(id))} onChange={(event) => setReferenceSelection((selected) => event.target.checked ? [...selected, id] : selected.filter((value) => value !== id))} />引用事实</label> : <strong>引用事实</strong>}
                   <span className="muted">{reviewingBlock.fact_ids.includes(id) ? `原引用 v${reviewingBlock.facts_snapshot?.[id] ?? "?"} → ` : ""}当前 v{current?.revision ?? "?"}</span>
                 </div>
                 <p>{current?.text ?? "当前事实不可用"}</p>
                 {current && <div className="inline gap reference-fact-actions"><span className="tag">{current.confirmation_status === "excluded" ? "已排除" : current.confirmation_status === "confirmed" ? "已确认" : "待确认"}</span><span className="muted">{ROLE_NAMES[current.subject] ?? current.subject} · {blocks.find((block) => block.key === current.section)?.title ?? current.section}</span>
-                  {referenceMode === "sources" && <button className="text-button push" disabled={current.confirmation_status === "excluded"} onClick={() => {
+                  {referenceMode === "sources" && <button className="text-button push" disabled={PUBLIC_DEMO || current.confirmation_status === "excluded"} onClick={() => {
                     setReferenceText((value) => `${value}${value.trim() ? "\n" : ""}${current.text}`);
                     setReferenceSelection((selected) => selected.includes(id) ? selected : [...selected, id]);
                   }}><Plus size={14} />插入原文</button>}
@@ -855,10 +858,10 @@ export default function NoteEditor({
               </div>;
             })}
             {!referenceLoading && referenceMode === "sources" && !referenceFacts.length && <p className="muted">当前会话暂无事实。</p>}
-            {referenceSelection.length > 0 && <label>引用核对说明<textarea rows={3} maxLength={2000} value={referenceReason} onChange={(event) => setReferenceReason(event.target.value)} /></label>}
+            {referenceSelection.length > 0 && <label>引用核对说明<textarea readOnly={PUBLIC_DEMO} rows={3} maxLength={2000} value={referenceReason} onChange={(event) => setReferenceReason(event.target.value)} /></label>}
             <div className="modal-actions">
               <button className="secondary" onClick={() => setReferenceBlock(null)}>取消</button>
-              <button className="primary" disabled={referenceLoading || Boolean(referenceError) || !allReferencesAvailable || (referenceSelection.length > 0 && referenceReason.trim().length < 3) || referenceText.length > 40000} onClick={() => {
+              <button className="primary" disabled={PUBLIC_DEMO || referenceLoading || Boolean(referenceError) || !allReferencesAvailable || (referenceSelection.length > 0 && referenceReason.trim().length < 3) || referenceText.length > 40000} onClick={() => {
                 const fact_revisions = Object.fromEntries(referenceSelection.map((id) => [id, referenceFacts.find((fact) => fact.id === id)!.revision]));
                 setReferenceReviews((current) => {
                   const next = { ...current };

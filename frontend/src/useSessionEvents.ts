@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState } from "react";
 import { fetchEventSource } from "@microsoft/fetch-event-source";
 import { ApiError, isCancelled, tokenStore } from "./api";
+import { PUBLIC_DEMO } from "./mode";
 
 export interface PartialTranscript {
   run_id: string;
@@ -20,6 +21,7 @@ export function useSessionEvents(sessionId: string | undefined, refresh: () => P
   callbacks.current = { refresh, onError };
   useEffect(() => {
     setPartials([]);
+    if (PUBLIC_DEMO) { setConnection("静态演示"); return; }
     if (!sessionId) return;
     const controller = new AbortController();
     const generation = tokenStore.generation();

@@ -24,6 +24,7 @@ import { BrowserCapture, type CaptureState } from "./capture";
 import CaptureQuality from "./CaptureQuality";
 import { IconButton, Modal, Notice, Status, dateText } from "./components";
 import type { Session } from "./types";
+import { PUBLIC_DEMO } from "./mode";
 interface CaptureResult {
   channels: CaptureEnd[];
   pending_chunks: number;
@@ -52,7 +53,7 @@ export default function Recording({
   onActive: (active: boolean) => void;
   development: boolean;
 }) {
-  const [native] = useState(hasNativeBridge);
+  const [native] = useState(() => !PUBLIC_DEMO && hasNativeBridge());
   const [devices, setDevices] = useState<Device[]>([]);
   const [doctorDevice, setDoctorDevice] = useState("");
   const [patientDevice, setPatientDevice] = useState("");
@@ -168,6 +169,7 @@ export default function Recording({
     }
   }
   async function loadDevices() {
+    if (PUBLIC_DEMO) return;
     if (native) {
       const result = await bridgeCall<{ devices: Device[] }>("devices.list");
       setDevices(result.devices);
@@ -369,6 +371,7 @@ export default function Recording({
     });
   }
   const canStart =
+    !PUBLIC_DEMO &&
     session &&
     (native ? ["CREATED", "PAUSED", "RECORDING"].includes(session.status.toUpperCase()) : session.status === "CREATED") &&
     !active;
@@ -381,7 +384,7 @@ export default function Recording({
           </span>
           <strong>语音采集</strong>
           <span className="subtle">
-            {native ? "Windows 原生采音" : "浏览器 · 单通道"}
+            {PUBLIC_DEMO ? "公开演示 · 采音已禁用" : native ? "Windows 原生采音" : "浏览器 · 单通道"}
           </span>
         </div>
         <div className="inline">
@@ -407,7 +410,7 @@ export default function Recording({
           </select>
           <IconButton
             label="新建录音会话"
-            disabled={active || busy}
+            disabled={PUBLIC_DEMO || active || busy}
             onClick={() => void openNew()}
           >
             <Plus size={18} />
@@ -486,7 +489,7 @@ export default function Recording({
           {session && (
             <IconButton
               label="隔离误录会话"
-              disabled={busy || session.status === "QUARANTINED"}
+              disabled={PUBLIC_DEMO || busy || session.status === "QUARANTINED"}
               onClick={() => setShowQuarantine(true)}
             >
               <ShieldAlert size={17} />
@@ -518,28 +521,28 @@ export default function Recording({
           })}><RefreshCw size={16} /></IconButton>}
         </div>
       </div>
-      <CaptureQuality native={native} sessionId={session?.id} mode={session?.mode} state={capture.state} />
+      {!PUBLIC_DEMO && <CaptureQuality native={native} sessionId={session?.id} mode={session?.mode} state={capture.state} />}
       <div className="recording-foot">
         <span className="inline gap">
           <span
             className={`connection-dot ${capture.pending ? "amber" : ""}`}
           />
-          {capture.pending
+          {PUBLIC_DEMO ? "无音频采集或上传" : capture.pending
             ? `${capture.pending} 片待持久化确认`
             : `${capture.durable} 片已持久化确认`}
         </span>
         <span>
-          {session ? <Status value={session.status} /> : <span>尚未采集</span>}
+          {PUBLIC_DEMO ? <span>预置虚构会话</span> : session ? <Status value={session.status} /> : <span>尚未采集</span>}
         </span>
         <span className="recording-disclaimer">
-          {native ? "原生加密缓冲" : "内存缓冲 · 关闭页面可能丢失未确认音频"}
+          {PUBLIC_DEMO ? "未访问麦克风或本机服务" : native ? "原生加密缓冲" : "内存缓冲 · 关闭页面可能丢失未确认音频"}
         </span>
       </div>
       {capture.message && <Notice kind="bad">{capture.message}</Notice>}
       {!native && session && !active && ["PAUSED", "RECORDING", "INCOMPLETE", "FINALIZING"].includes(session.status) && (
         <Notice>当前页面未保留此会话的原始结束边界，不能继续录音或声明音频完整。请新建会话；如有原生缓存，请在 Windows 客户端恢复并核查。</Notice>
       )}
-      {development &&
+      {development && !PUBLIC_DEMO &&
         session &&
         !active &&
         session.status !== "QUARANTINED" && (

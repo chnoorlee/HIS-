@@ -2,6 +2,10 @@
 
 **面向住院医生，把语音采集、病史整理、来源核对和病历审核放在同一个工作台。**
 
+**[在线体验（只读演示）](https://chnoorlee.github.io/HIS-/)** · [自动部署状态](https://github.com/chnoorlee/HIS-/actions/workflows/pages.yml)
+
+GitHub Pages 提供使用虚构数据的公开工作台，无需登录；录音、ASR、大模型及病历写入需要另行部署完整后端。每次推送到 `main` 后，测试通过即自动发布。详见 [Pages 部署说明](docs/github-pages.md)。
+
 **许可：源码可见，仅限非商业使用。** 二次开发需署名 **Yongzhi Li (chnoorlee)** 并引用[原仓库](https://github.com/chnoorlee/HIS-)；商业用途需另行书面授权。详见 [LICENSE](LICENSE) 与[许可证与署名](#许可证与署名)。
 
 项目聚焦住院办公室中的医生口述和医患对话，提供中文 Web 工作台、Windows 原生采音端、后端文书服务，以及可替换的 ASR、大模型和 EMR 连接器。医生可以沿着“录音 → 转写 → 临床事实 → 住院文书 → 审核 → EMR 草稿”的流程完成病历整理。
@@ -313,6 +317,7 @@ HIS-/
 | [文书引用核对](docs/reference-review.md) | 逐章来源快照、新事实处置与冲突处理 |
 | [实现与验收记录](docs/implementation-progress.md) | 已交付能力、回归记录与未验证事项 |
 | [安装与恢复手册](docs/operations.md) | 配置、身份导入、部署、备份与恢复 |
+| [GitHub Pages 部署](docs/github-pages.md) | 公开演示、自动更新工作流与本地验证 |
 | [Windows 原生客户端](desktop/README.md) | 设备、采音、缓存与发布 |
 | [截图来源说明](docs/screenshots/README.md) | 实截图场景、模拟数据及裁切方式 |
 

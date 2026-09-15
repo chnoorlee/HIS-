@@ -1,3 +1,5 @@
+import { PUBLIC_DEMO } from "./mode";
+
 export class ApiError extends Error {
   constructor(
     public status: number,
@@ -33,6 +35,12 @@ export async function authenticatedFetch(
   path: string,
   options: RequestInit = {},
 ): Promise<Response> {
+  if (PUBLIC_DEMO) {
+    if (options.signal?.aborted) throw new DOMException("Request cancelled", "AbortError");
+    const { demoResponse } = await import("./demo");
+    if (options.signal?.aborted) throw new DOMException("Request cancelled", "AbortError");
+    return demoResponse(path, options);
+  }
   const token = tokenStore.get();
   const generation = authGeneration;
   const controller = new AbortController();
